@@ -1,7 +1,21 @@
 ---
 # clang-analyzer-core.uninitialized.UndefReturn can be removed once LLVM is upgrade to fix
 # https://bugs.llvm.org/show_bug.cgi?id=39201
-Checks:          '*,-fuchsia-default-arguments,-google-runtime-references,-clang-analyzer-core.uninitialized.UndefReturn'
+Checks: '
+  *,
+  -cert-msc32-c,
+  -cert-msc51-cpp,
+  -cppcoreguidelines-avoid-magic-numbers,
+  -cppcoreguidelines-macro-usage,
+  -fuchsia-default-arguments-calls,
+  -fuchsia-default-arguments-declarations,
+  -fuchsia-default-arguments,
+  -fuchsia-trailing-return,
+  -google-runtime-references,
+  -llvm-header-guard,
+  -modernize-use-trailing-return-type,
+  -readability-magic-numbers,
+  -clang-analyzer-core.uninitialized.UndefReturn'
 WarningsAsErrors: '*'
 HeaderFilterRegex: '\/include\/'
 AnalyzeTemporaryDtors: false

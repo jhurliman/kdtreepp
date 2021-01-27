@@ -13,7 +13,7 @@ static void BM_Points3dConstruction(benchmark::State& state) {
   std::uniform_real_distribution<double> dist{-1000.0, 1000.0};
 
   // Make random points
-  const size_t count = size_t(state.range(0));
+  const auto count = size_t(state.range(0));
   points.resize(count);
   for (auto& point : points) {
     point << dist(randGen), dist(randGen), dist(randGen);
@@ -43,7 +43,7 @@ static void BM_Points3dClosest(benchmark::State& state) {
       points.begin(), points.end(), [](const Vector3& p) { return p; },
       [](const Vector3& p) { return p; });
 
-  const size_t iterations = size_t(state.range(1));
+  const auto iterations = size_t(state.range(1));
 
   while (state.KeepRunning()) {
     for (size_t i = 0; i < iterations; i++) {

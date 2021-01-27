@@ -1,14 +1,11 @@
+#pragma once
+
 #include <Eigen/Dense>
 #include <memory>
 #include <variant>
 #include <vector>
 
 namespace kdtreepp {
-
-// Define an alignment boundary equal to 4 times the size of the underlying
-// scalar type T times the number of dimensions N.
-template <typename T, int N>
-constexpr size_t ALIGNMENT = sizeof(T) * 4 * (1 + ((N - 1) / 4));
 
 // The EigenKdTreeNode represents one element of the k-d tree, which may be
 // either a leaf (containing an iterable sequence), or a branch (containing a
@@ -19,7 +16,7 @@ constexpr size_t ALIGNMENT = sizeof(T) * 4 * (1 + ((N - 1) / 4));
 // the element centroid), and the second returns a point or aligned box that is
 // used to extend a bounding box.
 template <typename Iterator, typename T, int N>
-class alignas(ALIGNMENT<T, N>) EigenKdTreeNode {
+class alignas(sizeof(T) * 4 * (1 + ((N - 1) / 4))) EigenKdTreeNode {
 public:
   // Construct a EigenKdTreeNode from the iterable range.
   // The node will compute a surrounding bounds for the range of objects,
@@ -68,11 +65,11 @@ public:
     }
   }
 
-  bool isLeaf() const { return _body.index() == 0; }
+  [[nodiscard]] bool isLeaf() const { return _body.index() == 0; }
 
-  bool isBranch() const { return _body.index() == 1; }
+  [[nodiscard]] bool isBranch() const { return _body.index() == 1; }
 
-  const auto& bounds() const { return _bounds; }
+  [[nodiscard]] const auto& bounds() const { return _bounds; }
 
   // Recursively visit every item in this node and its children,
   // provided the bounding box of each node passes the "BoundsTest" function
