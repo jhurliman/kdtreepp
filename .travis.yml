@@ -29,7 +29,7 @@ matrix:
           packages: [ 'libstdc++-8-dev', 'libeigen3-dev' ]
     - os: linux
       sudo: required # workaround https://github.com/mapbox/node-cpp-skel/issues/93
-      env: CXXFLAGS="-fsanitize=address,undefined,integer -fno-sanitize-recover=all"
+      env: CXXFLAGS="-fsanitize=address,undefined -fno-sanitize-recover=all"
       addons:
         apt:
           sources: [ 'ubuntu-toolchain-r-test' ]

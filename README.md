@@ -82,8 +82,8 @@ make test
 Enable additional sanitizers to catch hard-to-find bugs, for example:
 
 ```shell
-export LDFLAGS="-fsanitize=address,undefined,integer"
-export CXXFLAGS="-fsanitize=address,undefined,integer"
+export LDFLAGS="-fsanitize=address,undefined"
+export CXXFLAGS="-fsanitize=address,undefined"
 
 make
 ```

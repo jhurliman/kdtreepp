@@ -14,7 +14,7 @@ static void CHECK_VEC3_EQ(const Vector3& a, const Vector3& b) {
 
 TEST_CASE("VERSION_STRING") { REQUIRE(KDTREEPP_VERSION_STRING == std::string("1.0.0")); }
 
-__attribute__((no_sanitize("integer"))) TEST_CASE("PointTreeTest") {
+TEST_CASE("PointTreeTest") {
   // Build a k-d tree from a list of points
 
   std::vector<Vector3, Eigen::aligned_allocator<Vector3>> points;
