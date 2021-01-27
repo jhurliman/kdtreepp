@@ -7,8 +7,55 @@
 
 ## Usage
 
+### Search for the closest 3D point
+
 ```cpp
-TODO
+#include <Eigen/StdVector>
+#include <iostream>
+#include <random>
+#include <vector>
+
+#include "kdtreepp.hpp"
+
+using Vector3 = Eigen::Vector3d;
+using AlignedBox3 = Eigen::AlignedBox3d;
+
+int main() {
+  std::vector<Vector3, Eigen::aligned_allocator<Vector3>> points;
+  std::mt19937_64 randGen{42};
+  std::uniform_real_distribution<double> dist{-1000.0, 1000.0};
+
+  // Make random points
+  points.resize(size_t(5000));
+  for (auto& point : points) {
+    point << dist(randGen), dist(randGen), dist(randGen);
+  }
+
+  // Construct a k-d tree from 3d points
+  const auto node = kdtreepp::MakeEigenKdTreeNode<double, 3>(
+      points.begin(), points.end(), [](const Vector3& p) { return p; },
+      [](const Vector3& p) { return p; });
+
+  // Create a random query point
+  const Vector3 queryPoint{dist(randGen), dist(randGen), dist(randGen)};
+
+  // Find the closest point to the given query point
+  double minDistSq = std::numeric_limits<double>::max();
+  Vector3 closestPoint;
+  node.visit(
+      [&minDistSq, queryPoint](const AlignedBox3& bounds) {
+        return bounds.squaredExteriorDistance(queryPoint) < minDistSq;
+      },
+      [&minDistSq, &closestPoint, queryPoint](const Vector3& point) {
+        const double rSq = (point - queryPoint).squaredNorm();
+        if (rSq < minDistSq) {
+          minDistSq = rSq;
+          closestPoint = point;
+        }
+      });
+
+  std::cout << "Closest point to " << queryPoint << " is " << closestPoint << "\n";
+}
 ```
 
 ## Test
