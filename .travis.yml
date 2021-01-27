@@ -9,7 +9,7 @@ matrix:
       addons:
         apt:
           sources: [ 'ubuntu-toolchain-r-test' ]
-          packages: [ 'libstdc++6', 'libstdc++-5-dev', 'libeigen3-dev' ]
+          packages: [ 'libstdc++-8-dev', 'libeigen3-dev' ]
       script:
         - make tidy
         - make format
@@ -26,14 +26,14 @@ matrix:
       addons:
         apt:
           sources: [ 'ubuntu-toolchain-r-test' ]
-          packages: [ 'libstdc++6', 'libstdc++-5-dev', 'libeigen3-dev' ]
+          packages: [ 'libstdc++-8-dev', 'libeigen3-dev' ]
     - os: linux
       sudo: required # workaround https://github.com/mapbox/node-cpp-skel/issues/93
       env: CXXFLAGS="-fsanitize=address,undefined,integer -fno-sanitize-recover=all"
       addons:
         apt:
           sources: [ 'ubuntu-toolchain-r-test' ]
-          packages: [ 'libstdc++6', 'libstdc++-5-dev', 'libeigen3-dev' ]
+          packages: [ 'libstdc++-8-dev', 'libeigen3-dev' ]
     # coverage build
     - os: linux
       sudo: false
@@ -41,7 +41,7 @@ matrix:
       addons:
         apt:
           sources: [ 'ubuntu-toolchain-r-test' ]
-          packages: [ 'libstdc++6', 'libstdc++-5-dev', 'libeigen3-dev' ]
+          packages: [ 'libstdc++-8-dev', 'libeigen3-dev' ]
       script:
         - make debug
         - make test
