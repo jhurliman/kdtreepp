@@ -4,7 +4,7 @@ set -eu
 set -o pipefail
 
 export MASON_RELEASE="${_MASON_RELEASE:-v0.22.0}"
-export MASON_LLVM_RELEASE="${_MASON_LLVM_RELEASE:-11.0.0}"
+export MASON_LLVM_RELEASE="${_MASON_LLVM_RELEASE:-10.0.0}"
 
 PLATFORM=$(uname | tr A-Z a-z)
 if [[ ${PLATFORM} == 'darwin' ]]; then

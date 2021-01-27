@@ -22,7 +22,7 @@ using AlignedBox3 = Eigen::AlignedBox3d;
 
 int main() {
   std::vector<Vector3, Eigen::aligned_allocator<Vector3>> points;
-  std::mt19937_64 randGen{42};
+  std::mt19937_64 randGen{size_t(42)};
   std::uniform_real_distribution<double> dist{-1000.0, 1000.0};
 
   // Make random points
