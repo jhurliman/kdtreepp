@@ -92,4 +92,4 @@ make
 
 kdtreepp is licensed under [MIT](https://opensource.org/licenses/MIT).
 
-[![badge](https://mapbox.s3.amazonaws.com/cpp-assets/hpp-skel-badge_blue.svg)](https://github.com/mapbox/hpp-skel)
+Made with [hpp-skel](https://github.com/mapbox/hpp-skel).
