@@ -15,18 +15,18 @@ matrix:
         - make format
     - os: linux
       sudo: false
-      env: CXX=g++-4.9
+      env: CXX=g++-7
       addons:
         apt:
           sources: [ 'ubuntu-toolchain-r-test' ]
-          packages: [ 'g++-4.9' ]
+          packages: [ 'g++-7' ]
     - os: linux
       sudo: false
-      env: CXX=g++-5
+      env: CXX=g++-9
       addons:
         apt:
           sources: [ 'ubuntu-toolchain-r-test' ]
-          packages: [ 'g++-5' ]
+          packages: [ 'g++-9' ]
     - os: linux
       sudo: false
       env: CXX=clang++
@@ -61,7 +61,7 @@ matrix:
 
 env:
   global:
-   - CMAKE_VERSION="3.8.2"
+   - CMAKE_VERSION="3.18.1"
 
 install:
   # set up the environment by installing mason and clang++

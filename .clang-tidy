@@ -1,7 +1,7 @@
 ---
 # clang-analyzer-core.uninitialized.UndefReturn can be removed once LLVM is upgrade to fix
 # https://bugs.llvm.org/show_bug.cgi?id=39201
-Checks:          '*,-fuchsia-default-arguments,-clang-analyzer-core.uninitialized.UndefReturn'
+Checks:          '*,-fuchsia-default-arguments,-google-runtime-references,-clang-analyzer-core.uninitialized.UndefReturn'
 WarningsAsErrors: '*'
 HeaderFilterRegex: '\/include\/'
 AnalyzeTemporaryDtors: false
@@ -21,9 +21,9 @@ CheckOptions:
   - key:             modernize-loop-convert.NamingStyle
     value:           CamelCase
   - key:             modernize-pass-by-value.IncludeStyle
-    value:           llvm
+    value:           google
   - key:             modernize-replace-auto-ptr.IncludeStyle
-    value:           llvm
+    value:           google
   - key:             modernize-use-nullptr.NullMacros
     value:           'NULL'
 ...

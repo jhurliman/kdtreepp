@@ -1,10 +1,14 @@
 cmake_minimum_required(VERSION 3.8)
-project(hpp_skel LANGUAGES CXX)
-set(CMAKE_CXX_STANDARD 11)
+project(kdtreepp LANGUAGES CXX)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED on)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
+
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/mason.cmake)
+
+find_package(Eigen3 REQUIRED)
 
 option(WERROR "Add -Werror flag to build (turns warnings into errors)" ON)
 
@@ -23,9 +27,7 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
   set(DESIRED_WARNINGS "${DESIRED_WARNINGS} -Wmost")
 endif()
 
-# Note: -D_GLIBCXX_USE_CXX11_ABI=0 is needed to support mason packages that are precompiled libs
-# Currently we only depend on a header only library, but this will help avoid issues when more libs are added via mason
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OPTIMIZATION_FLAGS} -D_GLIBCXX_USE_CXX11_ABI=0 ${DESIRED_WARNINGS}")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OPTIMIZATION_FLAGS} ${DESIRED_WARNINGS}")
 
 if (WERROR)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror")
@@ -37,6 +39,8 @@ include_directories(SYSTEM ${MASON_PACKAGE_catch_INCLUDE_DIRS})
 
 mason_use(benchmark VERSION 1.4.1)
 include_directories(SYSTEM ${MASON_PACKAGE_benchmark_INCLUDE_DIRS})
+
+include_directories(SYSTEM ${EIGEN3_INCLUDE_DIR})
 
 include_directories("${PROJECT_SOURCE_DIR}/include")
 
