@@ -2,8 +2,8 @@
 
 ### A C++ k-d tree implementation
 
-[![Build Status](https://travis-ci.com/jhurliman/kdtreepp.svg?branch=master)](https://travis-ci.com/jhurliman/kdtreepp)
-[![codecov](https://codecov.io/gh/jhurliman/kdtreepp/branch/master/graph/badge.svg)](https://codecov.io/gh/jhurliman/kdtreepp)
+[![Build Status](https://travis-ci.com/jhurliman/kdtreepp.svg?branch=main)](https://travis-ci.com/jhurliman/kdtreepp)
+[![codecov](https://codecov.io/gh/jhurliman/kdtreepp/branch/main/graph/badge.svg)](https://codecov.io/gh/jhurliman/kdtreepp)
 
 ## Usage
 
