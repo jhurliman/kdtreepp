@@ -5,7 +5,7 @@ set -o pipefail
 
 # https://clang.llvm.org/extra/clang-tidy/
 
-CLANG_TIDY_SCRIPT="run-clang-tidy"
+CLANG_TIDY_SCRIPT=`find /usr/bin/ /usr/local/bin -name run-clang-tidy* -print -quit`
 
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 cd ${DIR}/..
