@@ -3,7 +3,9 @@
 #define CATCH_CONFIG_MAIN
 #include <catch2/catch.hpp>
 
+using Vector2 = Eigen::Vector2d;
 using Vector3 = Eigen::Vector3d;
+using AlignedBox2 = Eigen::AlignedBox2d;
 using AlignedBox3 = Eigen::AlignedBox3d;
 
 static void CHECK_VEC3_EQ(const Vector3& a, const Vector3& b) {
@@ -23,7 +25,7 @@ TEST_CASE("PointTreeTest") {
 
   // Make random points
   constexpr size_t count = 1500;
-  points.resize(1500);
+  points.resize(count);
   for (auto& point : points) {
     point << dist(randGen), dist(randGen), dist(randGen);
   }
@@ -81,4 +83,45 @@ TEST_CASE("PointTreeTest") {
 
   CHECK(foundPoints > count / 10);
   CHECK(foundPoints < count / 2);
+}
+
+TEST_CASE("ModifyInPlace") {
+  // Build a k-d tree from a list of points
+
+  std::vector<Vector2, Eigen::aligned_allocator<Vector2>> points;
+  std::mt19937_64 randGen{size_t(42)};
+  std::uniform_real_distribution<double> dist{0.1, 1.0};
+
+  // Make random points
+  constexpr size_t count = 100;
+  points.resize(count);
+  for (auto& point : points) {
+    point << dist(randGen), dist(randGen), dist(randGen);
+  }
+
+  auto node = kdtreepp::MakeEigenKdTreeNode<double, 2>(
+      points.begin(), points.end(), [](const Vector2& p) { return p; },
+      [](const Vector2& p) { return p; });
+
+  size_t numBoundsChecks = 0;
+  size_t numPointChecks = 0;
+  node.visit(
+      [&numBoundsChecks](const AlignedBox2& bounds) {
+        (void)bounds;
+        ++numBoundsChecks;
+        return true;
+      },
+
+      [&numPointChecks](Vector2& point) {
+        ++numPointChecks;
+        point *= -1.0;
+      });
+
+  CHECK(numBoundsChecks < count);
+  CHECK(numPointChecks == count);
+
+  for (const auto& point : points) {
+    CHECK(point.x() < 0.0);
+    CHECK(point.y() < 0.0);
+  }
 }
