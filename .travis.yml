@@ -3,10 +3,10 @@ python: "3.7"
 
 matrix:
   include:
-    # clang-tidy/format specific job
+    # clang-format/tidy specific job
     - os: linux
       sudo: false
-      env: CLANG_FORMAT CLANG_TIDY
+      env: CXX=clang++ CLANG_FORMAT CLANG_TIDY
       addons:
         apt:
           sources: [ 'ubuntu-toolchain-r-test' ]
