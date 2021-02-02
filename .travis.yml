@@ -14,6 +14,7 @@ matrix:
       script:
         - make tidy
         - make format
+    # build with gcc
     - os: linux
       sudo: false
       env: CXX=g++-9
@@ -21,6 +22,7 @@ matrix:
         apt:
           sources: [ 'ubuntu-toolchain-r-test' ]
           packages: [ 'g++-9' ]
+    # build with clang
     - os: linux
       sudo: false
       env: CXX=clang++
@@ -28,9 +30,10 @@ matrix:
         apt:
           sources: [ 'ubuntu-toolchain-r-test' ]
           packages: [ 'clang', 'libstdc++-8-dev' ]
+    # build with sanitizer checks under clang
     - os: linux
       sudo: required # workaround https://github.com/mapbox/node-cpp-skel/issues/93
-      env: CXXFLAGS="-fsanitize=address,undefined -fno-sanitize-recover=all"
+      env: CXX=clang++ CXXFLAGS="-fsanitize=address,undefined -fno-sanitize-recover=all"
       addons:
         apt:
           sources: [ 'ubuntu-toolchain-r-test' ]
@@ -38,7 +41,7 @@ matrix:
     # coverage build
     - os: linux
       sudo: false
-      env: CXXFLAGS="--coverage" LDFLAGS="--coverage"
+      env: CXX=clang++ CXXFLAGS="--coverage" LDFLAGS="--coverage"
       addons:
         apt:
           sources: [ 'ubuntu-toolchain-r-test' ]
