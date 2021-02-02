@@ -10,7 +10,8 @@ class KdTreePpConan(ConanFile):
     license = ("MIT")
     topics = ("data-structures", "spatial", "eigen")
     settings = "os", "compiler", "build_type", "arch"
-    requires = "catch2/2.13.4", "benchmark/1.5.2"
+    requires = "eigen/3.3.9"
+    build_requires = "catch2/2.13.4", "benchmark/1.5.2"
     generators = "cmake"
 
     def source(self):

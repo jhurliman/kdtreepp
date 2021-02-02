@@ -28,14 +28,6 @@ clean:
 	# remove remains from running 'make coverage'
 	rm -f *.profraw
 	rm -f *.profdata
-	@echo "run 'make distclean' to also clear mason_packages, .mason, and .toolchain directories"
-
-distclean: clean
-	rm -rf mason_packages
-	# remove remains from running './scripts/setup.sh'
-	rm -rf .mason
-	rm -rf .toolchain
-	rm -f local.env
 
 format:
 	./scripts/format.sh

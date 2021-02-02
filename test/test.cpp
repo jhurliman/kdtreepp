@@ -48,8 +48,8 @@ TEST_CASE("PointTreeTest") {
   // Find closest point using kdtree
   double minDistSq = std::numeric_limits<double>::max();
   Vector3 closestPoint;
-  int numBoundsChecks = 0;
-  int numPointChecks = 0;
+  size_t numBoundsChecks = 0;
+  size_t numPointChecks = 0;
   node.visit(
       [&minDistSq, checkPoint, &numBoundsChecks](const AlignedBox3& bounds) {
         ++numBoundsChecks;

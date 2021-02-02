@@ -6,16 +6,12 @@ set -o pipefail
 # http://clang.llvm.org/docs/UsersManual.html#profiling-with-instrumentation
 # https://www.bignerdranch.com/blog/weve-got-you-covered/
 
-# automatically setup environment
-
-./scripts/setup.sh --config local.env
-source local.env
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
+cd ${DIR}/..
 
 make clean
 export CXXFLAGS="-fprofile-instr-generate -fcoverage-mapping"
 export LDFLAGS="-fprofile-instr-generate"
-mason install llvm-cov ${MASON_LLVM_RELEASE}
-mason link llvm-cov ${MASON_LLVM_RELEASE}
 make debug
 rm -f *profraw
 rm -f *gcov

@@ -3,7 +3,6 @@ build/
 *.profdata
 *.profraw
 .toolchain
-local.env
 .vs
 .vscode
 CMakeSettings.json
