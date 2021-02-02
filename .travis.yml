@@ -13,7 +13,9 @@ matrix:
           packages: [ 'clang', 'clang-format', 'clang-tidy', 'libstdc++-8-dev' ]
       script:
         - make tidy
-        - make format
+        # FIXME: Re-enable this when we are using a pinned clang-format instead
+        # of the system version
+        # - make format
     # build with gcc
     - os: linux
       sudo: false
