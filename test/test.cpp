@@ -1,7 +1,7 @@
 #include <Eigen/StdVector>
 #include <kdtreepp.hpp>
 #define CATCH_CONFIG_MAIN
-#include <catch.hpp>
+#include <catch2/catch.hpp>
 
 using Vector3 = Eigen::Vector3d;
 using AlignedBox3 = Eigen::AlignedBox3d;

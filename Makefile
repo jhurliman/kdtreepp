@@ -1,7 +1,7 @@
 
 # Whether to turn compiler warnings into errors
 export WERROR ?= true
-export BUILD_DIR ?= cmake-build
+export BUILD_DIR ?= build
 
 default: release
 
