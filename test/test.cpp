@@ -96,7 +96,7 @@ TEST_CASE("ModifyInPlace") {
   constexpr size_t count = 100;
   points.resize(count);
   for (auto& point : points) {
-    point << dist(randGen), dist(randGen), dist(randGen);
+    point << dist(randGen), dist(randGen);
   }
 
   auto node = kdtreepp::MakeEigenKdTreeNode<double, 2>(
