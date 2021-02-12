@@ -13,8 +13,8 @@ else() # in user space
   include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/conan.cmake)
   conan_cmake_run(CONANFILE conanfile.py
                   BASIC_SETUP
-				  CMAKE_TARGETS
-				  BUILD missing)
+                  CMAKE_TARGETS
+                  BUILD missing)
 endif()
 
 find_package(Eigen3 REQUIRED)
