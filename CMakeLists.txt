@@ -40,7 +40,11 @@ configure_package_config_file(cmake/kdtreeppConfig.cmake.in
   ${CMAKE_CURRENT_BINARY_DIR}/kdtreeppConfig.cmake
   INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/kdtreepp)
 write_basic_package_version_file(${CMAKE_CURRENT_BINARY_DIR}/kdtreeppConfigVersion.cmake
-  VERSION ${PROJECT_VERSION} COMPATIBILITY SameMajorVersion)
+  VERSION ${PROJECT_VERSION} COMPATIBILITY SameMajorVersion ARCH_INDEPENDENT)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/kdtreeppConfig.cmake
   ${CMAKE_CURRENT_BINARY_DIR}/kdtreeppConfigVersion.cmake
   DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/kdtreepp)
+
+if(KDTREEPP_BUILD_TESTS)
+  add_test(NAME architecture-independent-version COMMAND ${CMAKE_COMMAND} -DVERSION_FILE=${CMAKE_CURRENT_BINARY_DIR}/kdtreeppConfigVersion.cmake -P ${CMAKE_CURRENT_SOURCE_DIR}/test/architecture-version.cmake)
+endif()
