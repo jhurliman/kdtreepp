@@ -1,110 +1,132 @@
 # kdtreepp
 
-### A C++ k-d tree implementation
+[![CI](https://github.com/jhurliman/kdtreepp/actions/workflows/ci.yml/badge.svg)](https://github.com/jhurliman/kdtreepp/actions/workflows/ci.yml)
 
-Requires C++17 and Eigen. The library is header-only; tests and benchmarks are optional and are not consumer dependencies.
+**Build spatial queries over your own data.** A header-only C++17 k-d tree with Eigen geometry, custom point and bounds accessors, and a visitor API for pruning the search space.
 
-## Bazel / Bzlmod
+Use it for nearest-neighbor searches, region queries, or spatial filtering of objects that have a position or bounding box. You supply the data and query logic; the tree supplies a hierarchy of bounds that lets you skip irrelevant regions.
 
-Until a release is registered in the Bazel Central Registry, use a checkout override:
+- **Keep your object type.** Accessor functions describe where each object is and which bounds contain it.
+- **Control the query.** A bounds predicate prunes branches, and a visitor examines candidate items.
+- **Integrate as a library.** CMake exports a target; Bzlmod declares Eigen transitively. Tests and benchmarks are optional.
 
-```starlark
-bazel_dep(name = "kdtreepp", version = "2.0.0")
-local_path_override(module_name = "kdtreepp", path = "third_party/kdtreepp")
-```
+The tree partitions the input range **in place** and retains iterators into it. Keep the underlying storage alive and its iterators valid for the tree's lifetime. If positions or bounds change, rebuild the tree before querying. Nodes allocate memory; the tree does not make a separate owning copy of your objects.
 
-Link `@kdtreepp//:kdtreepp` from your `cc_library`, `cc_binary`, or `cc_test`. Eigen is declared transitively. Set C++17 or newer in your monorepo's toolchain/configuration (for example `--cxxopt=-std=c++17`); dependency `.bazelrc` files do not set consumer compiler options. Repository renaming through `repo_name` is supported.
+## Find the closest point
 
-For a remote checkout, replace the local override with a `git_override` using a reviewed, full commit SHA. This repository is not yet registered in BCR, so `bazel_dep` alone is not sufficient. No dependency downloads occur during C++ compilation.
-
-## CMake
-
-With Eigen installed, use `add_subdirectory` and link `kdtreepp::kdtreepp`, or install and consume the exported package:
-
-```sh
-cmake -S . -B build -DCMAKE_INSTALL_PREFIX=/your/prefix
-cmake --install build
-```
-
-```cmake
-find_package(kdtreepp CONFIG REQUIRED)
-target_link_libraries(my_application PRIVATE kdtreepp::kdtreepp)
-```
-
-CMake no longer invokes Conan automatically or changes global compiler flags. The Conan 2 recipe declares Eigen transitively and is validated with `conan create . --build=missing -s compiler.cppstd=17`. Conan 1 is no longer supported.
-
-## Usage
-
-### Search for the closest 3D point
+This complete example builds a 3D tree and uses squared distances to prune nodes farther away than the best point found so far:
 
 ```cpp
+#include <kdtreepp.hpp>
 #include <Eigen/StdVector>
 #include <iostream>
-#include <random>
+#include <limits>
 #include <vector>
 
-#include "kdtreepp.hpp"
-
-using Vector3 = Eigen::Vector3d;
-using AlignedBox3 = Eigen::AlignedBox3d;
-
 int main() {
-  std::vector<Vector3, Eigen::aligned_allocator<Vector3>> points;
-  std::mt19937_64 randGen{size_t(42)};
-  std::uniform_real_distribution<double> dist{-1000.0, 1000.0};
+  using Point = Eigen::Vector3d;
+  std::vector<Point, Eigen::aligned_allocator<Point>> points{
+      Point{0, 0, 0}, Point{4, 0, 0}, Point{0, 3, 0}};
 
-  // Make random points
-  points.resize(size_t(5000));
-  for (auto& point : points) {
-    point << dist(randGen), dist(randGen), dist(randGen);
-  }
+  const auto tree = kdtreepp::MakeEigenKdTreeNode<double, 3>(
+      points.begin(), points.end(),
+      [](const Point& p) { return p; },  // sort point
+      [](const Point& p) { return p; }); // bounds contributor
 
-  // Construct a k-d tree from 3d points
-  const auto node = kdtreepp::MakeEigenKdTreeNode<double, 3>(
-      points.begin(), points.end(), [](const Vector3& p) { return p; },
-      [](const Vector3& p) { return p; });
+  const Point query{3, 0, 0};
+  double bestDistanceSq = std::numeric_limits<double>::infinity();
+  Point closest = Point::Zero();
+  bool found = false;
 
-  // Create a random query point
-  const Vector3 queryPoint{dist(randGen), dist(randGen), dist(randGen)};
-
-  // Find the closest point to the given query point
-  double minDistSq = std::numeric_limits<double>::max();
-  Vector3 closestPoint;
-  node.visit(
-      [&minDistSq, queryPoint](const AlignedBox3& bounds) {
-        return bounds.squaredExteriorDistance(queryPoint) < minDistSq;
+  tree.visit(
+      [&](const Eigen::AlignedBox3d& bounds) {
+        return bounds.squaredExteriorDistance(query) < bestDistanceSq;
       },
-      [&minDistSq, &closestPoint, queryPoint](const Vector3& point) {
-        const double rSq = (point - queryPoint).squaredNorm();
-        if (rSq < minDistSq) {
-          minDistSq = rSq;
-          closestPoint = point;
+      [&](const Point& point) {
+        const double distanceSq = (point - query).squaredNorm();
+        if (distanceSq < bestDistanceSq) {
+          bestDistanceSq = distanceSq;
+          closest = point;
+          found = true;
         }
       });
 
-  std::cout << "Closest point to " << queryPoint << " is " << closestPoint << "\n";
+  if (found) std::cout << closest.transpose() << '\n'; // 4 0 0
 }
 ```
 
-## Test
+For custom objects, return an Eigen point from the sort accessor and a point or aligned box from the bounds accessor. A region query follows the same pattern: reject nonintersecting node bounds, then test each visited item against the exact region. Leaf visitors receive candidates, so the item-level test remains your responsibility.
+
+## Bazel / Bzlmod
+
+The 2.0.0 build integration is prepared in this branch and is not yet registered in the Bazel Central Registry. Start with a local checkout in your monorepo:
+
+```starlark
+# MODULE.bazel
+bazel_dep(name = "kdtreepp", version = "2.0.0", repo_name = "spatial")
+local_path_override(module_name = "kdtreepp", path = "third_party/kdtreepp")
+```
+
+Add `@spatial//:kdtreepp` to your target's `deps`. Eigen is a transitive dependency, and the renamed repository is covered by the [independent consumer example](examples/bazel-consumer).
+
+For a remote dependency, replace the local override with `git_override(module_name = "kdtreepp", remote = "https://github.com/jhurliman/kdtreepp.git", commit = "<reviewed full commit SHA>")`. Once BCR registration is accepted, the override can be removed.
+
+Configure C++17 or newer in your monorepo toolchain—for GCC/Clang, `--cxxopt=-std=c++17`. The repository tests use Bazel 9.2. See [RELEASING.md](RELEASING.md) for archive verification and BCR preparation.
+
+## CMake
+
+Install Eigen's CMake package first. Then either use `add_subdirectory` and link `kdtreepp::kdtreepp`, or install the header package:
 
 ```sh
-bazel test //:regression_test
-cmake -S . -B build -DKDTREEPP_BUILD_TESTS=ON
-cmake --build build
+cmake -S . -B build -DCMAKE_INSTALL_PREFIX=/path/to/prefix
+cmake --install build
+```
+
+In the consuming project:
+
+```cmake
+find_package(kdtreepp 2 CONFIG REQUIRED)
+target_link_libraries(my_application PRIVATE kdtreepp::kdtreepp)
+```
+
+Set `CMAKE_PREFIX_PATH` to the installation prefix. The target propagates Eigen and the C++17 requirement. Installation is relocatable and architecture-independent; the library does not set global compiler flags. A complete [installed consumer](examples/cmake-consumer) is included.
+
+### Conan 2
+
+The recipe packages the headers and declares Eigen as a dependency:
+
+```sh
+conan profile detect
+conan create . --build=missing -s compiler.cppstd=17
+```
+
+This creates and tests a local Conan package; it does not publish one. CMake does not invoke Conan automatically. Conan 1 is no longer supported.
+
+## Tree construction and traversal
+
+`MakeEigenKdTreeNode<T, N>(begin, end, sortPointGetter, boundsGetter, maxPerLeaf = 8, maxSubDivs = 16)` builds a tree from a mutable random-access range. `T` is the coordinate scalar type and `N` is the dimension.
+
+| Member | Use |
+| --- | --- |
+| `bounds()` | Inspect a node's surrounding aligned box. |
+| `isLeaf()` / `isBranch()` | Inspect the node type. |
+| `visit(boundsTest, visitor)` | Visit items under nodes whose bounds pass your predicate. |
+
+Use finite coordinates, a positive `maxPerLeaf`, and a nonnegative `maxSubDivs`. Smaller leaves can enable tighter pruning at the cost of more nodes; the best configuration depends on your data and queries. The library does not provide dynamic insertion/removal or a dedicated nearest-neighbor method—the example implements the search through traversal.
+
+## Development
+
+```sh
+bazelisk test //:regression_test --cxxopt=-std=c++17
+cmake -S . -B build -DKDTREEPP_BUILD_TESTS=ON -DCMAKE_BUILD_TYPE=Release
+cmake --build build --parallel
 ctest --test-dir build --output-on-failure
 ```
 
-The regression checks compare nearest-neighbor results with brute force over empty, singleton, boundary-sized and larger trees, and check duplicate points. Enable `KDTREEPP_BUILD_LEGACY_TESTS` with Catch2 2.x installed to run the original tests, or `KDTREEPP_BUILD_BENCHMARKS` with Google Benchmark installed.
+Regression tests compare nearest-neighbor results with brute force, including empty, singleton, duplicate and boundary-sized inputs. CI also checks sanitizers, installed CMake consumers, Conan, Make targets and a checksum-verified archive consumed through a temporary Bazel registry.
 
-For sanitizer checks, configure with `-DCMAKE_CXX_FLAGS=-fsanitize=address,undefined` on a supporting compiler.
+Enable `KDTREEPP_BUILD_LEGACY_TESTS` with Catch2 2.x installed for the original suite, or `KDTREEPP_BUILD_BENCHMARKS` with Google Benchmark installed. [RELEASING.md](RELEASING.md) documents Make, coverage and release commands; [CHANGELOG.md](CHANGELOG.md) describes the version 2 build migration. No general performance improvement is claimed by that migration.
 
-# License
+## License
 
-kdtreepp is licensed under [MIT](https://opensource.org/licenses/MIT).
-
-Made with [hpp-skel](https://github.com/mapbox/hpp-skel).
-
-## Release preparation
-
-See [RELEASING.md](RELEASING.md) for the tested Conan consumer, restored Make commands and BCR archive/registry validation and submission procedure. Version 2.0.0 is prepared in this branch; it is not yet published or registered.
+[MIT](LICENSE). Originally scaffolded with [hpp-skel](https://github.com/mapbox/hpp-skel).
