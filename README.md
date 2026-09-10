@@ -9,7 +9,7 @@ Requires C++17 and Eigen. The library is header-only; tests and benchmarks are o
 Until a release is registered in the Bazel Central Registry, use a checkout override:
 
 ```starlark
-bazel_dep(name = "kdtreepp", version = "1.0.0")
+bazel_dep(name = "kdtreepp", version = "2.0.0")
 local_path_override(module_name = "kdtreepp", path = "third_party/kdtreepp")
 ```
 
@@ -31,7 +31,7 @@ find_package(kdtreepp CONFIG REQUIRED)
 target_link_libraries(my_application PRIVATE kdtreepp::kdtreepp)
 ```
 
-CMake no longer invokes Conan automatically or changes global compiler flags. Existing Conan 1 recipes remain legacy and have not been validated with this integration; supply Eigen through a package manager or installed CMake package.
+CMake no longer invokes Conan automatically or changes global compiler flags. The Conan 2 recipe declares Eigen transitively and is validated with `conan create . --build=missing -s compiler.cppstd=17`. Conan 1 is no longer supported.
 
 ## Usage
 
@@ -104,3 +104,7 @@ For sanitizer checks, configure with `-DCMAKE_CXX_FLAGS=-fsanitize=address,undef
 kdtreepp is licensed under [MIT](https://opensource.org/licenses/MIT).
 
 Made with [hpp-skel](https://github.com/mapbox/hpp-skel).
+
+## Release preparation
+
+See [RELEASING.md](RELEASING.md) for the tested Conan consumer, restored Make commands and BCR archive/registry validation and submission procedure. Version 2.0.0 is prepared in this branch; it is not yet published or registered.

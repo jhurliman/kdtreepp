@@ -14,7 +14,7 @@ static void CHECK_VEC3_EQ(const Vector3& a, const Vector3& b) {
   CHECK(a[2] == Approx(b[2]));
 }
 
-TEST_CASE("VERSION_STRING") { REQUIRE(KDTREEPP_VERSION_STRING == std::string("1.0.0")); }
+TEST_CASE("VERSION_STRING") { REQUIRE(KDTREEPP_VERSION_STRING == std::string("2.0.0")); }
 
 TEST_CASE("PointTreeTest") {
   // Build a k-d tree from a list of points

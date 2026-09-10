@@ -1,32 +1,29 @@
-from conans import ConanFile, CMake
-
+import os
+from conan import ConanFile
+from conan.tools.files import copy
 
 class KdTreePpConan(ConanFile):
     name = "kdtreepp"
-    version = "1.0.0"
+    version = "2.0.0"
+    package_type = "header-library"
+    license = "MIT"
     url = "https://github.com/jhurliman/kdtreepp"
-    homepage = "https://github.com/jhurliman/kdtreepp"
-    description = "A C++ k-d tree implementation"
-    license = ("MIT")
-    topics = ("data-structures", "spatial", "eigen")
-    settings = "os", "compiler", "build_type", "arch"
-    requires = "eigen/3.3.9"
-    build_requires = "catch2/2.13.4", "benchmark/1.5.2"
-    generators = "cmake"
+    homepage = url
+    description = "A header-only C++17 k-d tree for Eigen"
+    exports_sources = "include/*", "LICENSE"
+    no_copy_source = True
 
-    def source(self):
-        self.run("git clone https://github.com/jhurliman/kdtreepp.git")
-
-    def build(self):
-        cmake = CMake(self)
-        cmake.configure(source_folder="kdtreepp")
-        cmake.build()
+    def requirements(self):
+        self.requires("eigen/3.4.0", transitive_headers=True)
 
     def package(self):
-        cmake = CMake(self)
-        cmake.configure(source_folder=self._source_subfolder)
-        cmake.install()
+        copy(self, "*.hpp", src=os.path.join(self.source_folder, "include"),
+             dst=os.path.join(self.package_folder, "include"))
+        copy(self, "LICENSE", src=self.source_folder,
+             dst=os.path.join(self.package_folder, "licenses"))
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "kdtreepp"
-        self.cpp_info.names["pkg_config"] = "kdtreepp"
+        self.cpp_info.bindirs = []
+        self.cpp_info.libdirs = []
+        self.cpp_info.set_property("cmake_file_name", "kdtreepp")
+        self.cpp_info.set_property("cmake_target_name", "kdtreepp::kdtreepp")

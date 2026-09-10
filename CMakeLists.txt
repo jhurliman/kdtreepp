@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
-project(kdtreepp VERSION 1.0.0 LANGUAGES CXX)
+project(kdtreepp VERSION 2.0.0 LANGUAGES CXX)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 find_package(Eigen3 REQUIRED NO_MODULE)

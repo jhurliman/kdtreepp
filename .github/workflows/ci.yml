@@ -12,6 +12,7 @@ jobs:
           node-version: 24
       - run: npm install --global @bazel/bazelisk@1.28.1
       - run: bazelisk test //:regression_test
+      - run: BAZEL=bazelisk python3 tools/test_bcr.py
       - run: bazelisk test //:consumer --cxxopt=-std=c++17
         working-directory: examples/bazel-consumer
   cmake:
@@ -22,3 +23,21 @@ jobs:
       - run: cmake -S . -B build -DKDTREEPP_BUILD_TESTS=ON -DCMAKE_CXX_FLAGS=-fsanitize=address,undefined -DCMAKE_INSTALL_PREFIX="$PWD/install"
       - run: cmake --build build && ctest --test-dir build --output-on-failure && cmake --install build
       - run: cmake -S examples/cmake-consumer -B consumer-build -DCMAKE_PREFIX_PATH="$PWD/install" && cmake --build consumer-build && ./consumer-build/consumer
+
+  conan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install conan==2.32.0
+      - run: conan profile detect && conan create . --build=missing -s compiler.cppstd=17
+  make:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update && sudo apt-get install -y libeigen3-dev libbenchmark-dev clang llvm
+      - run: make test
+      - run: make bench BENCHMARK_FILTER='BM_Points3dConstruction/100$'
+      - run: CXX=clang++ make coverage
