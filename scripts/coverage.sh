@@ -1,25 +1,18 @@
 #!/usr/bin/env bash
-
-set -eu
-set -o pipefail
-
-# http://clang.llvm.org/docs/UsersManual.html#profiling-with-instrumentation
-# https://www.bignerdranch.com/blog/weve-got-you-covered/
-
-DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
-cd ${DIR}/..
-
-make clean
-export CXXFLAGS="-fprofile-instr-generate -fcoverage-mapping"
-export LDFLAGS="-fprofile-instr-generate"
-make debug
-rm -f *profraw
-rm -f *gcov
-rm -f *profdata
-LLVM_PROFILE_FILE="code-%p.profraw" make test
-CXX_MODULE="./build/unit-tests"
-llvm-profdata merge -output=code.profdata code-*.profraw
-llvm-cov report ${CXX_MODULE} -instr-profile=code.profdata -use-color
-llvm-cov show ${CXX_MODULE} -instr-profile=code.profdata src/*.cpp -path-equivalence -use-color
-llvm-cov show ${CXX_MODULE} -instr-profile=code.profdata src/*.cpp -path-equivalence -use-color --format html > /tmp/coverage.html
-echo "open /tmp/coverage.html for HTML version of this report"
+set -euo pipefail
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+BUILD="${BUILD_DIR:-${ROOT}/build-coverage}"
+mkdir -p "${BUILD}"
+BUILD="$(cd "${BUILD}" && pwd)"
+cmake -S "${ROOT}" -B "${BUILD}" -DCMAKE_BUILD_TYPE=Debug \
+  -DCMAKE_CXX_COMPILER="${CXX:-clang++}" -DKDTREEPP_BUILD_TESTS=ON \
+  -DCMAKE_CXX_FLAGS="-fprofile-instr-generate -fcoverage-mapping" \
+  -DCMAKE_EXE_LINKER_FLAGS="-fprofile-instr-generate"
+cmake --build "${BUILD}"
+rm -f "${BUILD}"/coverage-*.profraw
+LLVM_PROFILE_FILE="${BUILD}/coverage-%p.profraw" ctest --test-dir "${BUILD}" --output-on-failure
+llvm-profdata merge -sparse "${BUILD}"/coverage-*.profraw -o "${BUILD}/coverage.profdata"
+llvm-cov report "${BUILD}/kdtreepp-regression" -instr-profile="${BUILD}/coverage.profdata"
+llvm-cov show "${BUILD}/kdtreepp-regression" -instr-profile="${BUILD}/coverage.profdata" \
+  --format=html -output-dir="${BUILD}/coverage"
+echo "HTML report: ${BUILD}/coverage/index.html"

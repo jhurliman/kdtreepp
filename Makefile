@@ -1,35 +1,25 @@
-
-# Whether to turn compiler warnings into errors
-export WERROR ?= true
-export BUILD_DIR ?= build
-
-default: release
-
+BUILD_DIR ?= build
+BENCHMARK_FILTER ?= .
+.PHONY: release debug test bench clean format coverage tidy
 release:
-	mkdir -p ./$(BUILD_DIR) && cd ./$(BUILD_DIR) && cmake ../ -DCMAKE_BUILD_TYPE=Release -DWERROR=$(WERROR) && VERBOSE=1 cmake --build .
-
+	cmake -S . -B $(BUILD_DIR) -DCMAKE_BUILD_TYPE=Release -DKDTREEPP_BUILD_TESTS=ON
+	cmake --build $(BUILD_DIR)
 debug:
-	mkdir -p ./$(BUILD_DIR) && cd ./$(BUILD_DIR) && cmake ../ -DCMAKE_BUILD_TYPE=Debug -DWERROR=$(WERROR) && VERBOSE=1 cmake --build .
-
-test:
-	@if [ -f ./$(BUILD_DIR)/bin/unit-tests ]; then ./$(BUILD_DIR)/bin/unit-tests; else echo "Please run 'make release' or 'make debug' first" && exit 1; fi
-
+	cmake -S . -B $(BUILD_DIR) -DCMAKE_BUILD_TYPE=Debug -DKDTREEPP_BUILD_TESTS=ON
+	cmake --build $(BUILD_DIR)
+test: release
+	ctest --test-dir $(BUILD_DIR) --output-on-failure
 bench:
-	@if [ -f ./$(BUILD_DIR)/bin/bench-tests ]; then ./$(BUILD_DIR)/bin/bench-tests; else echo "Please run 'make release' or 'make debug' first" && exit 1; fi
-
-tidy:
-	./scripts/clang-tidy.sh
-
-coverage:
-	./scripts/coverage.sh
-
+	cmake -S . -B $(BUILD_DIR) -DCMAKE_BUILD_TYPE=Release -DKDTREEPP_BUILD_BENCHMARKS=ON
+	cmake --build $(BUILD_DIR) --target bench-tests
+	$(BUILD_DIR)/bench-tests --benchmark_filter="$(BENCHMARK_FILTER)" --benchmark_min_time=0.01s
 clean:
-	rm -rf ./$(BUILD_DIR)
-	# remove remains from running 'make coverage'
-	rm -f *.profraw
-	rm -f *.profdata
-
+	cmake -E rm -rf $(BUILD_DIR)
 format:
 	./scripts/format.sh
 
-.PHONY: test bench
+coverage:
+	BUILD_DIR="$(BUILD_DIR)-coverage" ./scripts/coverage.sh
+
+tidy: debug
+	BUILD_DIR="$(BUILD_DIR)" ./scripts/clang-tidy.sh

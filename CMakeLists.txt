@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
-project(kdtreepp VERSION 1.0.0 LANGUAGES CXX)
+project(kdtreepp VERSION 2.0.0 LANGUAGES CXX)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 find_package(Eigen3 REQUIRED NO_MODULE)
@@ -39,7 +40,11 @@ configure_package_config_file(cmake/kdtreeppConfig.cmake.in
   ${CMAKE_CURRENT_BINARY_DIR}/kdtreeppConfig.cmake
   INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/kdtreepp)
 write_basic_package_version_file(${CMAKE_CURRENT_BINARY_DIR}/kdtreeppConfigVersion.cmake
-  VERSION ${PROJECT_VERSION} COMPATIBILITY SameMajorVersion)
+  VERSION ${PROJECT_VERSION} COMPATIBILITY SameMajorVersion ARCH_INDEPENDENT)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/kdtreeppConfig.cmake
   ${CMAKE_CURRENT_BINARY_DIR}/kdtreeppConfigVersion.cmake
   DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/kdtreepp)
+
+if(KDTREEPP_BUILD_TESTS)
+  add_test(NAME architecture-independent-version COMMAND ${CMAKE_COMMAND} -DVERSION_FILE=${CMAKE_CURRENT_BINARY_DIR}/kdtreeppConfigVersion.cmake -P ${CMAKE_CURRENT_SOURCE_DIR}/test/architecture-version.cmake)
+endif()

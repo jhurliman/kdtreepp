@@ -9,7 +9,7 @@ using AlignedBox3 = Eigen::AlignedBox3d;
 
 static void BM_Points3dConstruction(benchmark::State& state) {
   std::vector<Vector3, Eigen::aligned_allocator<Vector3>> points;
-  std::mt19937_64 randGen{size_t(state.thread_index)};
+  std::mt19937_64 randGen{size_t(state.thread_index())};
   std::uniform_real_distribution<double> dist{-1000.0, 1000.0};
 
   // Make random points
@@ -20,7 +20,7 @@ static void BM_Points3dConstruction(benchmark::State& state) {
   }
 
   while (state.KeepRunning()) {
-    const auto node = kdtreepp::MakeEigenKdTreeNode<double, 3>(
+    auto node = kdtreepp::MakeEigenKdTreeNode<double, 3>(
         points.begin(), points.end(), [](const Vector3& p) { return p; },
         [](const Vector3& p) { return p; });
     benchmark::DoNotOptimize(node);
@@ -30,7 +30,7 @@ static void BM_Points3dConstruction(benchmark::State& state) {
 
 static void BM_Points3dClosest(benchmark::State& state) {
   std::vector<Vector3, Eigen::aligned_allocator<Vector3>> points;
-  std::mt19937_64 randGen{size_t(state.thread_index)};
+  std::mt19937_64 randGen{size_t(state.thread_index())};
   std::uniform_real_distribution<double> dist{-1000.0, 1000.0};
 
   // Make random points
@@ -80,7 +80,8 @@ int main(int argc, char* argv[]) {
       ->Arg(1000000);
   benchmark::RegisterBenchmark("BM_Points3dClosest", BM_Points3dClosest)->Args({100000, 10000});
   benchmark::Initialize(&argc, argv);
-  benchmark::RunSpecifiedBenchmarks();
-
-  return 0;
+  if (benchmark::ReportUnrecognizedArguments(argc, argv)) return 1;
+  const auto matched = benchmark::RunSpecifiedBenchmarks();
+  benchmark::Shutdown();
+  return matched == 0 ? 1 : 0;
 }

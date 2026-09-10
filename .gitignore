@@ -12,3 +12,9 @@ bazel-testlogs
 /bazel-kdtreepp
 /examples/bazel-consumer/bazel-bazel-consumer
 /build/
+
+/test_package/build/
+/test_package/CMakeUserPresets.json
+
+/build-coverage/
+__pycache__/
