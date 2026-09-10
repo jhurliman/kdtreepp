@@ -6,5 +6,5 @@ build/
 .vs
 .vscode
 CMakeSettings.json
-/bazel-*
+bazel-*
 /build/
