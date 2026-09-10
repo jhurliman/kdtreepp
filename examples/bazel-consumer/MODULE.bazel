@@ -1,0 +1,4 @@
+module(name = "consumer")
+bazel_dep(name = "rules_cc", version = "0.2.22")
+bazel_dep(name = "kdtreepp", version = "1.0.0", repo_name = "spatial")
+local_path_override(module_name = "kdtreepp", path = "../..")
