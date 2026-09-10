@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- Consolidate all regression coverage under `KDTREEPP_BUILD_TESTS`; remove the separate Catch2 2.x suite and unused Conan 1/Eigen find modules.
+- Replace temporary release-branch wording in the README with installation guidance.
+
+
 ## 2.0.0 (release candidate)
 
 - Provide a Bzlmod library target with transitive Eigen and independent consumer checks.

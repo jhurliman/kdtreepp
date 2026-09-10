@@ -59,7 +59,7 @@ For custom objects, return an Eigen point from the sort accessor and a point or 
 
 ## Bazel / Bzlmod
 
-The 2.0.0 build integration is prepared in this branch and is not yet registered in the Bazel Central Registry. Start with a local checkout in your monorepo:
+Use Bzlmod to consume a local checkout in your monorepo. This example does not require a Bazel Central Registry entry:
 
 ```starlark
 # MODULE.bazel
@@ -125,7 +125,7 @@ ctest --test-dir build --output-on-failure
 
 Regression tests compare nearest-neighbor results with brute force, including empty, singleton, duplicate and boundary-sized inputs. CI also checks sanitizers, installed CMake consumers, Conan, Make targets and a checksum-verified archive consumed through a temporary Bazel registry.
 
-Enable `KDTREEPP_BUILD_LEGACY_TESTS` with Catch2 2.x installed for the original suite, or `KDTREEPP_BUILD_BENCHMARKS` with Google Benchmark installed. [RELEASING.md](RELEASING.md) documents Make, coverage and release commands; [CHANGELOG.md](CHANGELOG.md) describes the version 2 build migration. No general performance improvement is claimed by that migration.
+The standard regression suite also covers version reporting, spatial pruning, region queries, and in-place visitor mutation; no separate test framework is required. Enable `KDTREEPP_BUILD_BENCHMARKS` with Google Benchmark installed to run benchmarks. [RELEASING.md](RELEASING.md) documents Make, coverage and release commands; [CHANGELOG.md](CHANGELOG.md) describes the version 2 build migration. No general performance improvement is claimed by that migration.
 
 ## License
 
