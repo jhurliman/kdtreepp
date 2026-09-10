@@ -6,3 +6,9 @@ build/
 .vs
 .vscode
 CMakeSettings.json
+bazel-bin
+bazel-out
+bazel-testlogs
+/bazel-kdtreepp
+/examples/bazel-consumer/bazel-bazel-consumer
+/build/

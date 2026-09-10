@@ -2,8 +2,36 @@
 
 ### A C++ k-d tree implementation
 
-[![Build Status](https://travis-ci.com/jhurliman/kdtreepp.svg?branch=main)](https://travis-ci.com/jhurliman/kdtreepp)
-[![codecov](https://codecov.io/gh/jhurliman/kdtreepp/branch/main/graph/badge.svg)](https://codecov.io/gh/jhurliman/kdtreepp)
+Requires C++17 and Eigen. The library is header-only; tests and benchmarks are optional and are not consumer dependencies.
+
+## Bazel / Bzlmod
+
+Until a release is registered in the Bazel Central Registry, use a checkout override:
+
+```starlark
+bazel_dep(name = "kdtreepp", version = "1.0.0")
+local_path_override(module_name = "kdtreepp", path = "third_party/kdtreepp")
+```
+
+Link `@kdtreepp//:kdtreepp` from your `cc_library`, `cc_binary`, or `cc_test`. Eigen is declared transitively. Set C++17 or newer in your monorepo's toolchain/configuration (for example `--cxxopt=-std=c++17`); dependency `.bazelrc` files do not set consumer compiler options. Repository renaming through `repo_name` is supported.
+
+For a remote checkout, replace the local override with a `git_override` using a reviewed, full commit SHA. This repository is not yet registered in BCR, so `bazel_dep` alone is not sufficient. No dependency downloads occur during C++ compilation.
+
+## CMake
+
+With Eigen installed, use `add_subdirectory` and link `kdtreepp::kdtreepp`, or install and consume the exported package:
+
+```sh
+cmake -S . -B build -DCMAKE_INSTALL_PREFIX=/your/prefix
+cmake --install build
+```
+
+```cmake
+find_package(kdtreepp CONFIG REQUIRED)
+target_link_libraries(my_application PRIVATE kdtreepp::kdtreepp)
+```
+
+CMake no longer invokes Conan automatically or changes global compiler flags. Existing Conan 1 recipes remain legacy and have not been validated with this integration; supply Eigen through a package manager or installed CMake package.
 
 ## Usage
 
@@ -60,33 +88,16 @@ int main() {
 
 ## Test
 
-```shell
-# build test binaries
-make
-
-# run tests
-make test
-
-# run bench tests
-make bench
+```sh
+bazel test //:regression_test
+cmake -S . -B build -DKDTREEPP_BUILD_TESTS=ON
+cmake --build build
+ctest --test-dir build --output-on-failure
 ```
 
-The default test binaries will be built in release mode. You can make Debug test binaries as well:
+The regression checks compare nearest-neighbor results with brute force over empty, singleton, boundary-sized and larger trees, and check duplicate points. Enable `KDTREEPP_BUILD_LEGACY_TESTS` with Catch2 2.x installed to run the original tests, or `KDTREEPP_BUILD_BENCHMARKS` with Google Benchmark installed.
 
-```shell
-make clean
-make debug
-make test
-```
-
-Enable additional sanitizers to catch hard-to-find bugs, for example:
-
-```shell
-export LDFLAGS="-fsanitize=address,undefined"
-export CXXFLAGS="-fsanitize=address,undefined"
-
-make
-```
+For sanitizer checks, configure with `-DCMAKE_CXX_FLAGS=-fsanitize=address,undefined` on a supporting compiler.
 
 # License
 

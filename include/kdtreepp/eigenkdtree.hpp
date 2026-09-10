@@ -1,6 +1,9 @@
 #pragma once
 
 #include <Eigen/Dense>
+#include <algorithm>
+#include <iterator>
+#include <utility>
 #include <memory>
 #include <variant>
 #include <vector>

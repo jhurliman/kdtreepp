@@ -1,65 +1,45 @@
-cmake_minimum_required(VERSION 3.8)
-project(kdtreepp LANGUAGES CXX)
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED on)
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
-
-if(CONAN_EXPORTED) # in conan local cache
-  include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-  conan_basic_setup()
-else() # in user space
-  include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/conan.cmake)
-  conan_cmake_run(CONANFILE conanfile.py
-                  BASIC_SETUP
-                  CMAKE_TARGETS
-                  BUILD missing)
+cmake_minimum_required(VERSION 3.16)
+project(kdtreepp VERSION 1.0.0 LANGUAGES CXX)
+include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)
+find_package(Eigen3 REQUIRED NO_MODULE)
+add_library(kdtreepp INTERFACE)
+add_library(kdtreepp::kdtreepp ALIAS kdtreepp)
+target_compile_features(kdtreepp INTERFACE cxx_std_17)
+target_include_directories(kdtreepp INTERFACE
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
+target_link_libraries(kdtreepp INTERFACE Eigen3::Eigen)
+option(KDTREEPP_BUILD_TESTS "Build regression tests" OFF)
+option(KDTREEPP_BUILD_LEGACY_TESTS "Build Catch2 2.x tests" OFF)
+option(KDTREEPP_BUILD_BENCHMARKS "Build Google Benchmark benchmarks" OFF)
+if(KDTREEPP_BUILD_TESTS OR KDTREEPP_BUILD_LEGACY_TESTS)
+  enable_testing()
 endif()
-
-find_package(Eigen3 REQUIRED)
-
-if(NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE Debug)
+if(KDTREEPP_BUILD_TESTS)
+  add_executable(kdtreepp-regression test/regression.cpp)
+  target_link_libraries(kdtreepp-regression PRIVATE kdtreepp::kdtreepp)
+  add_test(NAME kdtreepp-regression COMMAND kdtreepp-regression)
 endif()
-
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-  set(OPTIMIZATION_FLAGS "-DDEBUG")
-  if(NOT MSVC)
-    set(OPTIMIZATION_FLAGS "${OPTIMIZATION_FLAGS} -O0")
-  endif()
-  message("-- Configuring debug build")
-else()
-  set(OPTIMIZATION_FLAGS "-DNDEBUG -O2")
-  message("-- Configuring release build")
+if(KDTREEPP_BUILD_LEGACY_TESTS)
+  find_package(Catch2 2 REQUIRED)
+  add_executable(unit-tests test/test.cpp)
+  target_link_libraries(unit-tests PRIVATE kdtreepp::kdtreepp Catch2::Catch2)
+  add_test(NAME unit-tests COMMAND unit-tests)
 endif()
-
-if(MSVC)
-  set(DESIRED_WARNINGS "-WX")
-else()
-  set(DESIRED_WARNINGS "-Wall -Wextra -Wconversion -Wunreachable-code -Wuninitialized -pedantic-errors -Wold-style-cast -Wno-error=unused-variable -Wshadow -Wfloat-equal")
-  if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-    set(DESIRED_WARNINGS "${DESIRED_WARNINGS} -Wmost")
-  endif()
-  if (WERROR)
-    set(DESIRED_WARNINGS "${DESIRED_WARNINGS} -Werror")
-  endif()
+if(KDTREEPP_BUILD_BENCHMARKS)
+  find_package(benchmark REQUIRED)
+  add_executable(bench-tests bench/run.cpp)
+  target_link_libraries(bench-tests PRIVATE kdtreepp::kdtreepp benchmark::benchmark)
 endif()
-
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OPTIMIZATION_FLAGS} ${DESIRED_WARNINGS}")
-
-include_directories(SYSTEM ${EIGEN3_INCLUDE_DIR})
-
-include_directories("${PROJECT_SOURCE_DIR}/include")
-
-file(GLOB TEST_SOURCES test/*.cpp)
-add_executable(unit-tests ${TEST_SOURCES})
-target_link_libraries(unit-tests CONAN_PKG::catch2)
-
-# libbenchmark.a supports threads and therefore needs pthread support
-find_package(Threads REQUIRED)
-file(GLOB BENCH_SOURCES bench/*.cpp)
-add_executable(bench-tests ${BENCH_SOURCES})
-
-# link benchmark static library to the bench-tests binary so the bench tests know where to find the benchmark impl code
-target_link_libraries(bench-tests CONAN_PKG::benchmark ${CMAKE_THREAD_LIBS_INIT})
+install(TARGETS kdtreepp EXPORT kdtreeppTargets)
+install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+install(EXPORT kdtreeppTargets NAMESPACE kdtreepp:: DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/kdtreepp)
+configure_package_config_file(cmake/kdtreeppConfig.cmake.in
+  ${CMAKE_CURRENT_BINARY_DIR}/kdtreeppConfig.cmake
+  INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/kdtreepp)
+write_basic_package_version_file(${CMAKE_CURRENT_BINARY_DIR}/kdtreeppConfigVersion.cmake
+  VERSION ${PROJECT_VERSION} COMPATIBILITY SameMajorVersion)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/kdtreeppConfig.cmake
+  ${CMAKE_CURRENT_BINARY_DIR}/kdtreeppConfigVersion.cmake
+  DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/kdtreepp)
