@@ -42,7 +42,9 @@ def prepare(archive, output, url=None):
     (target / 'source.json').write_text(json.dumps(source, indent=2) + '\n')
     (target / 'MODULE.bazel').write_bytes(module)
     (target / 'presubmit.yml').write_bytes((root / '.bcr/presubmit.yml').read_bytes())
-    (Path(output) / 'bazel_registry.json').write_text('{}\n')
+    descriptor = Path(output) / 'bazel_registry.json'
+    if not descriptor.exists():
+        descriptor.write_text('{}\n')
     return version
 
 

@@ -22,6 +22,13 @@ with tempfile.TemporaryDirectory(prefix='kdtree-bcr-') as temp:
         registry = base / 'registry'
         actual = prepare(archive,registry,f'http://127.0.0.1:{server.server_port}/source.tar.gz')
         assert actual == version
+        descriptor = registry / 'bazel_registry.json'
+        assert descriptor.read_text() == '{}\n'
+        existing = '{"mirrors": []}\n'
+        descriptor.write_text(existing)
+        prepare(archive, registry, f'http://127.0.0.1:{server.server_port}/source.tar.gz')
+        assert descriptor.read_text() == existing, 'existing registry configuration must survive'
+
         consumer = base / 'consumer'
         consumer.mkdir()
         (consumer/'MODULE.bazel').write_text(f'module(name="registry_consumer")\nbazel_dep(name="kdtreepp",version="{version}",repo_name="spatial")\nbazel_dep(name="rules_cc",version="0.2.22")\n')

@@ -21,4 +21,4 @@ class ConsumerTest(ConanFile):
 
     def test(self):
         if can_run(self):
-            self.run(os.path.join(self.cpp.build.bindir, "consumer"), env="conanrun")
+            self.run(os.path.join(self.cpp.build.bindirs[0], "consumer"), env="conanrun")
