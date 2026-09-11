@@ -1,6 +1,6 @@
 # Release 2.0.0
 
-This branch prepares a major release because integration now uses Bzlmod, exported CMake targets and Conan 2 instead of automatically invoking Conan 1. The C++17 library API is unchanged.
+Version 2.0.0 is a major release because integration now uses Bzlmod, exported CMake targets and Conan 2 instead of automatically invoking Conan 1. The C++17 library API is unchanged.
 
 ## Verify before tagging
 
